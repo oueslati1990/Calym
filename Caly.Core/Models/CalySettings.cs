@@ -26,7 +26,9 @@ public sealed class CalySettings
     {
         Width = 1000,
         Height = 500,
-        PaneSize = 350
+        PaneSize = 350,
+        LibreTranslateUrl = "https://libretranslate.com",
+        TranslationTargetLanguage = "ar"
     };
 
     // TODO - Add version for compatibility checks
