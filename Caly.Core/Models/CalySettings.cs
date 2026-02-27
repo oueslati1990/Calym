@@ -43,4 +43,8 @@ public sealed class CalySettings
     {
         PaneSize = 0
     }
+
+    public string LibreTranslateUrl { get; set; } = "https://libretranslate.com";
+
+    public string TranslationTargetLanguage { get; set; } = "ar";
 }

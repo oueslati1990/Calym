@@ -36,6 +36,7 @@
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" />
 		<PackageReference Include="System.Reactive" Version="6.1.0" />
+		<PackageReference Include="LibreTranslate.Net" Version="1.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
