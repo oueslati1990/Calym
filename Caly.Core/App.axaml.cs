@@ -97,6 +97,7 @@ public partial class App : Application
             services.AddSingleton<IStorageProvider>(_ => desktop.MainWindow.StorageProvider);
             services.AddSingleton<IClipboard>(_ =>
                 desktop.MainWindow.Clipboard ?? throw new ArgumentNullException(nameof(IClipboard)));
+            services.AddSingleton<ITranslationService, LibreTranslateService>();
 
             desktop.Startup += Desktop_Startup;
             desktop.Exit += Desktop_Exit;
@@ -220,10 +221,10 @@ public partial class App : Application
     {
         _listeningToFilesCts.Cancel();
         GC.KeepAlive(_listeningToFiles);
-        
+
         _listeningToFilesCts.Dispose();
         _pipeServer.Dispose();
-        
+
         if (_pdfDocumentsService is IDisposable disposable)
         {
             disposable.Dispose();
