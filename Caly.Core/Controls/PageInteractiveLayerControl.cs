@@ -82,7 +82,7 @@ public sealed class PageInteractiveLayerControl : Control
         get => GetValue(SelectedWordsProperty);
         set => SetValue(SelectedWordsProperty, value);
     }
-    
+
     public IReadOnlyList<PdfRectangle>? SearchResults
     {
         get => GetValue(SearchResultsProperty);
@@ -106,7 +106,7 @@ public sealed class PageInteractiveLayerControl : Control
         get => GetValue(VisibleAreaProperty);
         set => SetValue(VisibleAreaProperty, value);
     }
-    
+
     internal Matrix GetLayoutTransformMatrix()
     {
         return this.FindAncestorOfType<PageItemsControl>()?
@@ -195,9 +195,63 @@ public sealed class PageInteractiveLayerControl : Control
         attachedFlyout.ShowAt(this);
     }
 
+    public void HideTranslation()
+    {
+        if (FlyoutBase.GetAttachedFlyout(this) is not Flyout f) return;
+        f.Hide();
+        f.Content = null;
+    }
+
+    public void ShowTranslation(string originalWord, string? translation, bool isLoading = false)
+    {
+        if (FlyoutBase.GetAttachedFlyout(this) is not Flyout f) return;
+
+        if (isLoading)
+        {
+            f.Content = new StackPanel
+            {
+                Orientation = Orientation.Vertical,
+                MinWidth = 120,
+                Children =
+            {
+                new TextBlock { Text = originalWord, FontWeight = FontWeight.Bold },
+                new TextBlock { Text = "Translating…", Foreground = Brushes.Gray }
+            }
+            };
+            f.ShowAt(this);
+            return;
+        }
+
+        // If translation failed (null), dismiss silently.
+        if (translation is null) { f.Hide(); f.Content = null; return; }
+
+        f.Content = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            MaxWidth = 250,
+            Children =
+        {
+            new TextBlock
+            {
+                Text = originalWord,
+                FontWeight = FontWeight.Bold,
+                TextWrapping = TextWrapping.Wrap
+            },
+            new Separator { Margin = new Thickness(0, 4) },
+            new TextBlock
+            {
+                Text = translation,
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = 240
+            }
+        }
+        };
+        f.ShowAt(this);
+    }
+
     private StreamGeometry[]? _selectedWordsGeometry;
     private StreamGeometry[]? _searchResultsGeometry;
-    
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -225,7 +279,7 @@ public sealed class PageInteractiveLayerControl : Control
             }
         }
     }
-    
+
     public override void Render(DrawingContext context)
     {
         if (Bounds.Width <= 0 || Bounds.Height <= 0)
