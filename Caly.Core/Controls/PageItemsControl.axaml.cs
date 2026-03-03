@@ -40,6 +40,8 @@ using Avalonia.Threading;
 using Tabalonia.Controls;
 using UglyToad.PdfPig.Actions;
 using UglyToad.PdfPig.Core;
+using Caly.Core.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Caly.Core.Controls;
 
@@ -265,7 +267,7 @@ public sealed class PageItemsControl : ItemsControl
         {
             return presenter;
         }
-        
+
         return null;
     }
 
@@ -277,7 +279,7 @@ public sealed class PageItemsControl : ItemsControl
     public void GoToWord(int pageNumber, int wordIndex)
     {
         double yOffset = 0; // Top of page
-        
+
         var textLayer = GetPageItem(pageNumber)?.TextLayer?.PdfTextLayer;
         if (textLayer is not null)
         {
@@ -289,7 +291,7 @@ public sealed class PageItemsControl : ItemsControl
         // We don't attempt to get the text layer if it's not available
         GoToPage(pageNumber, yOffset);
     }
-    
+
     /// <summary>
     /// Scrolls to the page number, optionally scrolling to a specific Y position within the page.
     /// </summary>
@@ -648,6 +650,29 @@ public sealed class PageItemsControl : ItemsControl
                 {
                     CalyExtensions.OpenLink(match);
                 }
+                else if (word is not null)
+                {
+                    string wordText = word.Value;
+
+                    control.ShowTranslation(wordText, null, isLoading: true);
+
+                    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    _ = Task.Run(async () =>
+                    {
+                        var svc = App.Current?.Services?.GetService<ITranslationService>();
+                        string? result = svc is not null
+                            ? await svc.TranslateAsync(wordText, cts.Token)
+                            : null;
+
+                        Dispatcher.UIThread.Post(() =>
+                            control.ShowTranslation(wordText, result, isLoading: false));
+                    }, cts.Token).ContinueWith(t =>
+                    {
+                        cts.Dispose();
+                        if (t.IsFaulted)
+                            Dispatcher.UIThread.Post(() => control.HideTranslation());
+                    }, TaskScheduler.Default);
+                }
             }
         }
 
@@ -668,6 +693,7 @@ public sealed class PageItemsControl : ItemsControl
 
         interactiveLayer.SetDefaultCursor();
         interactiveLayer.HideAnnotation();
+        interactiveLayer.HideTranslation();
     }
 
     private void TextLayer_PointerMoved(object? sender, PointerEventArgs e)
