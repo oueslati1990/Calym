@@ -25,6 +25,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.VisualTree;
+using AvaloniaProgressRing;
 using Caly.Core.Utilities;
 using Caly.Pdf.Models;
 using System.Collections.Generic;
@@ -211,12 +212,42 @@ public sealed class PageInteractiveLayerControl : Control
             f.Content = new StackPanel
             {
                 Orientation = Orientation.Vertical,
-                MinWidth = 120,
+                Spacing = 8,
+                MinWidth = 160,
                 Children =
-            {
-                new TextBlock { Text = originalWord, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "Translating…", Foreground = Brushes.Gray }
-            }
+                {
+                    new TextBlock
+                    {
+                        Text = originalWord,
+                        FontWeight = FontWeight.SemiBold,
+                        FontSize = 13,
+                        TextWrapping = TextWrapping.Wrap,
+                        MaxWidth = 240
+                    },
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8,
+                        Children =
+                        {
+                            new ProgressRing
+                            {
+                                Width = 16,
+                                Height = 16,
+                                IsActive = true,
+                                VerticalAlignment = VerticalAlignment.Center
+                            },
+                            new TextBlock
+                            {
+                                Text = "Translating…",
+                                FontStyle = FontStyle.Italic,
+                                FontSize = 12,
+                                Opacity = 0.65,
+                                VerticalAlignment = VerticalAlignment.Center
+                            }
+                        }
+                    }
+                }
             };
             f.ShowAt(this);
             return;
@@ -228,23 +259,31 @@ public sealed class PageInteractiveLayerControl : Control
         f.Content = new StackPanel
         {
             Orientation = Orientation.Vertical,
-            MaxWidth = 250,
+            Spacing = 8,
+            MaxWidth = 260,
             Children =
-        {
-            new TextBlock
             {
-                Text = originalWord,
-                FontWeight = FontWeight.Bold,
-                TextWrapping = TextWrapping.Wrap
-            },
-            new Separator { Margin = new Thickness(0, 4) },
-            new TextBlock
-            {
-                Text = translation,
-                TextWrapping = TextWrapping.Wrap,
-                MaxWidth = 240
+                new TextBlock
+                {
+                    Text = originalWord,
+                    FontWeight = FontWeight.SemiBold,
+                    FontSize = 14,
+                    TextWrapping = TextWrapping.Wrap
+                },
+                new Border
+                {
+                    Height = 1,
+                    Background = new SolidColorBrush(Color.FromArgb(50, 128, 128, 128)),
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                },
+                new TextBlock
+                {
+                    Text = translation,
+                    TextWrapping = TextWrapping.Wrap,
+                    FontSize = 13,
+                    Opacity = 0.85
+                }
             }
-        }
         };
         f.ShowAt(this);
     }
