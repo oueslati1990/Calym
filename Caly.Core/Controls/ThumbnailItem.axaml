@@ -29,11 +29,6 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"/>
                     </Grid>
-                    <Label DockPanel.Dock="Top"
-                           Content="{Binding PageNumber}"
-                           HorizontalAlignment="Stretch"
-                           HorizontalContentAlignment="Center"
-                           Padding="0"/>
                 </DockPanel>
 
             </ControlTemplate>

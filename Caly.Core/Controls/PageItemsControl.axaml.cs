@@ -637,6 +637,7 @@ public sealed class PageItemsControl : ItemsControl
 
             // Words
             PdfWord? word = control.PdfTextLayer.FindWordOver(point.X, point.Y);
+            System.Console.WriteLine($"[Translation] ignore={ignore} point=({point.X:F1},{point.Y:F1}) word={word?.Value ?? "null"}");
             if (word is not null && control.PdfTextLayer.GetLine(word) is { IsInteractive: true } line)
             {
                 /*
@@ -652,29 +653,32 @@ public sealed class PageItemsControl : ItemsControl
                 {
                     CalyExtensions.OpenLink(match);
                 }
-                else if (word is not null)
+            }
+            else if (word is not null)
+            {
+                string wordText = word.Value;
+                System.Console.WriteLine($"[Translation] Showing popup for: {wordText}");
+
+                control.ShowTranslation(wordText, null, isLoading: true);
+
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                _ = Task.Run(async () =>
                 {
-                    string wordText = word.Value;
+                    var svc = App.Current?.Services?.GetService<ITranslationService>();
+                    System.Console.WriteLine($"[Translation] Service={svc?.GetType().Name ?? "null"}");
+                    string? result = svc is not null
+                        ? await svc.TranslateAsync(wordText, cts.Token)
+                        : null;
+                    System.Console.WriteLine($"[Translation] Result={result ?? "null"}");
 
-                    control.ShowTranslation(wordText, null, isLoading: true);
-
-                    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                    _ = Task.Run(async () =>
-                    {
-                        var svc = App.Current?.Services?.GetService<ITranslationService>();
-                        string? result = svc is not null
-                            ? await svc.TranslateAsync(wordText, cts.Token)
-                            : null;
-
-                        Dispatcher.UIThread.Post(() =>
-                            control.ShowTranslation(wordText, result, isLoading: false));
-                    }, cts.Token).ContinueWith(t =>
-                    {
-                        cts.Dispose();
-                        if (t.IsFaulted)
-                            Dispatcher.UIThread.Post(() => control.HideTranslation());
-                    }, TaskScheduler.Default);
-                }
+                    Dispatcher.UIThread.Post(() =>
+                        control.ShowTranslation(wordText, result, isLoading: false));
+                }, cts.Token).ContinueWith(t =>
+                {
+                    cts.Dispose();
+                    if (t.IsFaulted)
+                        Dispatcher.UIThread.Post(() => control.HideTranslation());
+                }, TaskScheduler.Default);
             }
         }
 

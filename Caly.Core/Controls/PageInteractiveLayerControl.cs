@@ -339,9 +339,6 @@ public sealed class PageInteractiveLayerControl : Control
             return;
         }
 
-        DebugRender.RenderAnnotations(this, context, VisibleArea.Value);
-        DebugRender.RenderText(this, context, VisibleArea.Value);
-
         // Draw search results first
         if (_searchResultsGeometry is not null && _searchResultsGeometry.Length > 0)
         {

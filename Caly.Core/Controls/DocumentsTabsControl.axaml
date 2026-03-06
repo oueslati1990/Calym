@@ -83,37 +83,7 @@
                             </PathIcon>
                         </Button>
 
-						<TextBox MinWidth="50"
-                                 MaxWidth="50"
-                                 TextAlignment="Center"
-                                 HorizontalContentAlignment="Center"
-                                 VerticalContentAlignment="Center"
-                                 VerticalAlignment="Center"
-								 KeyDown="PageNumberTextBox_OnKeyDown"
-                                 Text="{Binding SelectedPageNumber, UpdateSourceTrigger=Explicit}"
-                                  AcceptsReturn="False">
-							<TextBox.Styles>
-                                <Style Selector="DataValidationErrors">
-                                    <Setter Property="Template">
-                                        <ControlTemplate>
-                                            <ContentPresenter DockPanel.Dock="Left"
-                                                              Content="{TemplateBinding Content}"
-                                                              Margin="0"/>
-                                        </ControlTemplate>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Styles>
-                        </TextBox>
-
-						<TextBlock DockPanel.Dock="Left"
-								   VerticalAlignment="Center"
-								   HorizontalAlignment="Center"
-								   TextAlignment="Center"
-								   Margin="5,0">
-							<Run Text="/"/>
-							<Run Text="{Binding PageCount}"/>
-						</TextBlock>
-
+	
 						<controls:VerticalSeparator/>
 
 						<!-- Rotate pages -->

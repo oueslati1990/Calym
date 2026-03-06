@@ -1,51 +1,50 @@
 using System;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Caly.Core.Services.Interfaces;
-using LibreTranslate.Net;
 
 namespace Caly.Core.Services;
 
+[JsonSerializable(typeof(MyMemoryResponse))]
+[JsonSerializable(typeof(MyMemoryData))]
+internal partial class MyMemoryJsonContext : JsonSerializerContext;
+
 internal sealed class LibreTranslateService : ITranslationService
 {
-    private readonly LibreTranslate.Net.LibreTranslate _client;
-    private readonly LanguageCode _targetLanguage;
+    private static readonly HttpClient _http = new();
+    private readonly string _targetLanguage;
 
     public LibreTranslateService(ISettingsService settingsService)
     {
         var settings = settingsService.GetSettings();
-        _client = new LibreTranslate.Net.LibreTranslate(
-            (settings.LibreTranslateUrl ?? "https://libretranslate.com").TrimEnd('/'));
-        _targetLanguage = MapLanguageCode(settings.TranslationTargetLanguage ?? "ar");
+        _targetLanguage = settings.TranslationTargetLanguage ?? "ar";
     }
 
-    public async Task<string?> TranslateAsync(string word,
-                    CancellationToken cancellationToken = default)
+    public async Task<string?> TranslateAsync(string word, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(word)) return null;
         try
         {
-            return await _client.TranslateAsync(new Translate
-            {
-                Source = LanguageCode.AutoDetect,
-                Target = _targetLanguage,
-                Text = word
-            });
+            var url = $"https://api.mymemory.translated.net/get?q={Uri.EscapeDataString(word)}&langpair=en|{_targetLanguage}";
+            var response = await _http.GetFromJsonAsync(url, MyMemoryJsonContext.Default.MyMemoryResponse, cancellationToken);
+            return response?.ResponseData?.TranslatedText;
         }
-        catch { return null; }
+        catch (Exception ex) { System.Console.WriteLine($"[Translation] ERROR: {ex.Message}"); return null; }
     }
-    private static LanguageCode MapLanguageCode(string code) => code.ToLowerInvariant() switch
-    {
-        "ar" => LanguageCode.Arabic,
-        "zh" => LanguageCode.Chinese,
-        "fr" => LanguageCode.French,
-        "de" => LanguageCode.German,
-        "it" => LanguageCode.Italian,
-        "ja" => LanguageCode.Japanese,
-        "ko" => LanguageCode.Korean,
-        "pt" => LanguageCode.Portuguese,
-        "ru" => LanguageCode.Russian,
-        "es" => LanguageCode.Spanish,
-        _ => LanguageCode.English
-    };
+}
+
+internal sealed class MyMemoryResponse
+{
+    [JsonPropertyName("responseData")]
+    public MyMemoryData? ResponseData { get; set; }
+}
+
+internal sealed class MyMemoryData
+{
+    [JsonPropertyName("translatedText")]
+    public string? TranslatedText { get; set; }
 }
