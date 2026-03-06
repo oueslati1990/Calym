@@ -12,8 +12,7 @@
 		<JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
 		<Deterministic>true</Deterministic>
 		<Configurations>Debug;Release;AOT</Configurations>
-		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\Caly.snk</AssemblyOriginatorKeyFile>
+		<SignAssembly>False</SignAssembly>
 	</PropertyGroup>
 
 	<!-- Begin AOT publish -->
